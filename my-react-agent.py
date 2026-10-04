@@ -1,5 +1,5 @@
 import json
-
+from llm import call_llm
 
 # 模拟LLM：根据输入返回固定的Thought+Action
 def mock_llm(prompt):
@@ -32,10 +32,32 @@ def run_agent(user_input, max_steps=5):
     history = f"用户问题：{user_input}\n"
     for step in range(max_steps):
         print(f"\n--- 第{step + 1}轮 ---")
-        llm_output = mock_llm(history)
+
+
+        system_prompt = """你是一个ReAct Agent。根据用户问题和历史记录，决定下一步动作。
+        你必须返回JSON格式，包含四个字段：
+        - thought: 你的思考过程
+        - action: 要么是"search"（调用搜索），要么是"finish"（结束）
+        - action_input: 如果是search，填搜索关键词；如果是finish，填最终回答
+        只返回JSON，不要加任何其他文字。"""
+        full_prompt = system_prompt + "\n\n" + history
+        llm_output = call_llm(full_prompt)
+
+
+
         print(f"LLM输出：{llm_output}")
 
-        parsed = json.loads(llm_output)
+
+        # 清洗：去掉可能的 ```json 和 ``` 包裹
+        cleaned = llm_output.strip()
+        if cleaned.startswith("```"):
+            cleaned = cleaned.split("```")[1]
+            if cleaned.startswith("json"):
+                cleaned = cleaned[4:]
+        cleaned = cleaned.strip()
+        parsed = json.loads(cleaned)
+
+
         thought = parsed["thought"]
         action = parsed["action"]
         action_input = parsed["action_input"]
