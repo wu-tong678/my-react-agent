@@ -1,6 +1,8 @@
 import json
 from llm import call_llm
 import re
+
+
 # 模拟LLM：根据输入返回固定的Thought+Action
 def mock_llm(prompt):
     if "Observation" in prompt:
@@ -24,7 +26,8 @@ def mock_llm(prompt):
 
 # 模拟工具
 def search(query):
-    return f"{query}：晴，30度"
+    # 模拟真实API返回
+    return "北京今天晴，30度"
 
 #增加计算器工具
 def calculator(expression):
